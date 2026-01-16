@@ -1,7 +1,8 @@
 /**
  * @file SeekingController.hpp
  * @author Andrew Hilton (2131N)
- * @brief Seeking Controller featuring a simple linear and angular pid control algorithm
+ * @brief Seeking Controller featuring a simple linear and angular pid
+ * control algorithm
  * @version 0.1
  * @date 2025-12-26
  *
@@ -35,8 +36,11 @@ class SeekingController : public AbstractController
       std::shared_ptr<DifferentialChassis> pChassis,
       PID linearPID,
       PID angularPID,
-      const std::vector<std::shared_ptr<AbstractExitCondition>>& exitConditions = {})
-      : AbstractController(pChassis, exitConditions), linearPID(linearPID), angularPID(angularPID)
+      const std::vector<std::shared_ptr<AbstractExitCondition>>&
+          exitConditions = {})
+      : AbstractController(pChassis, exitConditions),
+        linearPID(linearPID),
+        angularPID(angularPID)
   {
   }
 
@@ -58,7 +62,9 @@ class SeekingController : public AbstractController
       mutex.unlock();
       target.asAsync = false;
 
-      pros::Task([this]() { this->moveTo(); }, "Async Seeking Controller Move To Task");
+      pros::Task(
+          [this]() { this->moveTo(); },
+          "Async Seeking Controller Move To Task");
       return;
     }
 
@@ -68,44 +74,53 @@ class SeekingController : public AbstractController
 
     while (pChassis->checkControlToken(key) &&  // While holding control
 
-           this->target.timeout.value_or(std::numeric_limits<std::uint32_t>::max()) >
+           this->target.timeout.value_or(
+               std::numeric_limits<std::uint32_t>::max()) >
                pros::millis() - startTime  // And within timeout
            && std::any_of(
                   std::begin(exitConditions),
                   std::end(exitConditions),
                   [&](std::shared_ptr<AbstractExitCondition> ec) {
-                    return !ec->isSatisfied(this->target, pChassis);  // or return !i ;
+                    return !ec->isSatisfied(
+                        this->target, pChassis);  // or return !i ;
                   }))
     {
       // Get the current pose and calculate the delta
       Pose currentPose = pChassis->getLocalizer()->getPose();
-      Point deltaPoint = this->target.targetPoint.value() - currentPose.getPoint();
+      Point deltaPoint =
+          this->target.targetPoint.value() - currentPose.getPoint();
 
       // Calculate Positional Error
       float distanceError = deltaPoint.magnitude();
       Angle<Radians> angularError =
-          Angle<Radians>(std::atan2(deltaPoint.y, deltaPoint.x)) - currentPose.getAngle<Radians>();
+          Angle<Radians>(std::atan2(deltaPoint.y, deltaPoint.x)) -
+          currentPose.getAngle<Radians>();
 
-      if (this->target.targetWithFront == Direction::BACKWARDS)
+      if (this->target.targetWithFront == Direction::BACK)
       {
-        angularError = Angle<Radians>(std::atan2(-deltaPoint.y, -deltaPoint.x)) -
-                       currentPose.getAngle<Radians>();
+        angularError =
+            Angle<Radians>(std::atan2(-deltaPoint.y, -deltaPoint.x)) -
+            currentPose.getAngle<Radians>();
       }
 
-      angularError = Angle<Radians>(std::remainder(angularError.getValue(), 2.0f * pi));
+      angularError = Angle<Radians>(
+          std::remainder(angularError.getValue(), 2.0f * pi));
 
       float linearSpeed = linearPID.calculate(distanceError, 0.01f);
 
       linearSpeed = std::min(
                         std::abs(linearSpeed),
-                        this->target.maxVelocityPct * pChassis->properties.maxVelocity) *
+                        this->target.maxVelocityPct *
+                            pChassis->properties.maxVelocity) *
                     sign(linearSpeed);
 
       linearSpeed *= std::cos(angularError.getValue());
-      linearSpeed *= (this->target.targetWithFront == Direction::BACKWARDS ? -1.0f : 1.0f);
+      linearSpeed *=
+          (this->target.targetWithFront == Direction::BACK ? -1.0f : 1.0f);
 
       linearSpeed = std::max(
-                        pChassis->properties.maxVelocity * this->target.finalVelocityPct,
+                        pChassis->properties.maxVelocity *
+                            this->target.finalVelocityPct,
                         std::abs(linearSpeed)) *
                     sign(linearSpeed);
 
@@ -114,13 +129,15 @@ class SeekingController : public AbstractController
       {
         if (this->target.targetHeading.has_value())
         {
-          // turn to face the finale pose angle if executing a pose movement
-          Angle<Radians> poseError = this->target.targetHeading.value() - currentPose.heading;
+          // turn to face the finale pose angle if executing a pose
+          // movement
+          Angle<Radians> poseError =
+              this->target.targetHeading.value() - currentPose.heading;
 
           while (std::fabs(poseError.getValue()) > pi)
-            poseError =
-                poseError -
-                Angle<Radians>(2.0f * pi * poseError.getValue() / std::fabs(poseError.getValue()));
+            poseError = poseError - Angle<Radians>(
+                                        2.0f * pi * poseError.getValue() /
+                                        std::fabs(poseError.getValue()));
 
           angularSpeed = angularPID.calculate(poseError.getValue(), 0.01f);
         }
@@ -132,16 +149,19 @@ class SeekingController : public AbstractController
             this->target.targetWithFront == Direction::AUTOMATIC)
         {
           angularError =
-              angularError -
-              Angle<Radians>((angularError.getValue() / fabs(angularError.getValue())) * pi);
+              angularError - Angle<Radians>(
+                                 (angularError.getValue() /
+                                  fabs(angularError.getValue())) *
+                                 pi);
           linearSpeed = -linearSpeed;
         }
 
-        angularSpeed = angularPID.calculate(angularError.getValue(), 0.01f);
+        angularSpeed =
+            angularPID.calculate(angularError.getValue(), 0.01f);
       }
 
-      pChassis->setVelocityCommand(
-          VelocityPair<Radians>{linearSpeed, Angle<Radians>(angularSpeed)});
+      pChassis->setVelocityCommand(VelocityPair<Radians>{
+          linearSpeed, Angle<Radians>(angularSpeed)});
 
       mutex.unlock();
       pros::delay(10);
@@ -164,7 +184,9 @@ class SeekingController : public AbstractController
       mutex.unlock();
       target.asAsync = false;
 
-      pros::Task([this]() { this->moveTo(); }, "Async Seeking Controller Move To Task");
+      pros::Task(
+          [this]() { this->moveTo(); },
+          "Async Seeking Controller Move To Task");
       return;
     }
 
@@ -173,13 +195,15 @@ class SeekingController : public AbstractController
     auto startTime = pros::millis();
 
     while (pChassis->checkControlToken(key) &&  // While holding control
-           this->target.timeout.value_or(std::numeric_limits<std::uint32_t>::max()) >
+           this->target.timeout.value_or(
+               std::numeric_limits<std::uint32_t>::max()) >
                pros::millis() - startTime  // And within timeout
            && std::any_of(
                   std::begin(exitConditions),
                   std::end(exitConditions),
                   [&](std::shared_ptr<AbstractExitCondition> ec) {
-                    return !ec->isSatisfied(this->target, pChassis);  // or return !i ;
+                    return !ec->isSatisfied(
+                        this->target, pChassis);  // or return !i ;
                   }))
     {
       // Get the current pose and calculate the delta
@@ -189,38 +213,46 @@ class SeekingController : public AbstractController
 
       if (this->target.targetPoint.has_value())
       {
-        Point deltaPoint = this->target.targetPoint.value() - currentPose.getPoint();
+        Point deltaPoint =
+            this->target.targetPoint.value() - currentPose.getPoint();
         // Calculate Positional Error
-        Angle<Radians> angularError = Angle<Radians>(std::atan2(deltaPoint.y, deltaPoint.x)) -
-                                      currentPose.getAngle<Radians>();
+        Angle<Radians> angularError =
+            Angle<Radians>(std::atan2(deltaPoint.y, deltaPoint.x)) -
+            currentPose.getAngle<Radians>();
 
-        if (this->target.targetWithFront == Direction::BACKWARDS)
+        if (this->target.targetWithFront == Direction::BACK)
         {
-          angularError = Angle<Radians>(std::atan2(-deltaPoint.y, -deltaPoint.x)) -
-                         currentPose.getAngle<Radians>();
+          angularError =
+              Angle<Radians>(std::atan2(-deltaPoint.y, -deltaPoint.x)) -
+              currentPose.getAngle<Radians>();
         }
 
-        angularError = Angle<Radians>(std::remainder(angularError.getValue(), 2 * pi));
+        angularError = Angle<Radians>(
+            std::remainder(angularError.getValue(), 2 * pi));
 
         if (fabs(angularError.getValue()) > pi / 2.0f &&
             this->target.targetWithFront == Direction::AUTOMATIC)
         {
           angularError =
-              angularError -
-              Angle<Radians>((angularError.getValue() / fabs(angularError.getValue())) * pi);
+              angularError - Angle<Radians>(
+                                 (angularError.getValue() /
+                                  fabs(angularError.getValue())) *
+                                 pi);
         }
 
-        angularSpeed = angularPID.calculate(angularError.getValue(), 0.01f);
+        angularSpeed =
+            angularPID.calculate(angularError.getValue(), 0.01f);
       }
       else if (this->target.targetHeading.has_value())
       {
         // turn to face the angle if the target is only thing specified
-        Angle<Radians> poseError = this->target.targetHeading.value() - currentPose.heading;
+        Angle<Radians> poseError =
+            this->target.targetHeading.value() - currentPose.heading;
 
         while (std::fabs(poseError.getValue()) > pi)
-          poseError =
-              poseError -
-              Angle<Radians>(2.0f * pi * poseError.getValue() / std::fabs(poseError.getValue()));
+          poseError = poseError - Angle<Radians>(
+                                      2.0f * pi * poseError.getValue() /
+                                      std::fabs(poseError.getValue()));
 
         angularSpeed = angularPID.calculate(poseError.getValue(), 0.01f);
       }
@@ -229,11 +261,14 @@ class SeekingController : public AbstractController
       angularSpeed =
           std::clamp(
               std::abs(angularSpeed),
-              this->target.finalVelocityPct * pChassis->properties.maxAngularVelocity.getValue(),
-              this->target.maxVelocityPct * pChassis->properties.maxAngularVelocity.getValue()) *
+              this->target.finalVelocityPct *
+                  pChassis->properties.maxAngularVelocity.getValue(),
+              this->target.maxVelocityPct *
+                  pChassis->properties.maxAngularVelocity.getValue()) *
           sign(angularSpeed);
 
-      pChassis->setVelocityCommand(VelocityPair<Radians>{0.0f, Angle<Radians>(angularSpeed)});
+      pChassis->setVelocityCommand(
+          VelocityPair<Radians>{0.0f, Angle<Radians>(angularSpeed)});
 
       mutex.unlock();
       pros::delay(10);
@@ -249,8 +284,10 @@ class SeekingController : public AbstractController
       std::shared_ptr<DifferentialChassis> pChassis,
       PID linearPID,
       PID angularPID,
-      const std::vector<std::shared_ptr<AbstractExitCondition>>& exitConditions = {})
+      const std::vector<std::shared_ptr<AbstractExitCondition>>&
+          exitConditions = {})
   {
-    return std::make_shared<SeekingController>(pChassis, linearPID, angularPID, exitConditions);
+    return std::make_shared<SeekingController>(
+        pChassis, linearPID, angularPID, exitConditions);
   }
 };

@@ -20,19 +20,20 @@
 
 enum class Direction
 {
-  FORWARDS,
-  BACKWARDS,
+  FRONT,
+  BACK,
   AUTOMATIC
 };
 
 struct Target
 {
-  std::optional<Point> targetPoint = std::nullopt;             // In inches
-  std::optional<Angle<Radians>> targetHeading = std::nullopt;  // In radians
+  std::optional<Point> targetPoint = std::nullopt;  // In inches
+  std::optional<Angle<Radians>> targetHeading =
+      std::nullopt;  // In radians
 
   float finalVelocityPct = 0.0f;  // In percent of max velocity
   float maxVelocityPct = 1.0f;    // In percent of max velocity
-  bool asAsync = false;           // Whether to execute the motion asynchronously
+  bool asAsync = false;  // Whether to execute the motion asynchronously
 
   std::optional<std::uint32_t> timeout = std::nullopt;  // In milliseconds
 
@@ -83,7 +84,8 @@ struct Target
       std::optional<std::uint32_t> timeout = std::nullopt,
       Direction targetWithFront = Direction::AUTOMATIC)
       : targetPoint(std::nullopt),
-        targetHeading(AngleConverter<Unit, Radians>::convert(target_heading.getValue())),
+        targetHeading(AngleConverter<Unit, Radians>::convert(
+            target_heading.getValue())),
         finalVelocityPct(std::abs(finalVelocityPct)),
         maxVelocityPct(std::abs(maxVelocityPct)),
         asAsync(asAsync),
