@@ -36,7 +36,8 @@ class BoomerangController : public AbstractController
       PID linearPID,
       PID angularPID,
       float kLead = 0.5f,
-      const std::vector<std::shared_ptr<AbstractExitCondition>>& exitConditions = {})
+      const std::vector<std::shared_ptr<AbstractExitCondition>>&
+          exitConditions = {})
       : AbstractController(pChassis, exitConditions),
         linearPID(linearPID),
         angularPID(angularPID),
@@ -47,14 +48,15 @@ class BoomerangController : public AbstractController
   void moveTo()
   {
     std::cout << "BoomerangController: Starting moveTo with target: "
-              << this->target.targetPoint.value().x << ", " << this->target.targetPoint.value().y
-              << std::endl;
+              << this->target.targetPoint.value().x << ", "
+              << this->target.targetPoint.value().y << std::endl;
     mutex.lock();
     linearPID.reset();
     angularPID.reset();
 
     // Enforce that the target is valid
-    if (!this->target.targetPoint.has_value() && !this->target.targetHeading.has_value())
+    if (!this->target.targetPoint.has_value() &&
+        !this->target.targetHeading.has_value())
     {
       mutex.unlock();
       return;
@@ -74,7 +76,8 @@ class BoomerangController : public AbstractController
     auto startTime = pros::millis();
 
     while (pChassis->checkControlToken(key) &&  // While holding control
-           this->target.timeout.value_or(std::numeric_limits<std::uint32_t>::max()) >
+           this->target.timeout.value_or(
+               std::numeric_limits<std::uint32_t>::max()) >
                pros::millis() - startTime  // And within timeout
            && std::any_of(
                   std::begin(exitConditions),
@@ -84,42 +87,52 @@ class BoomerangController : public AbstractController
                   }))
     {
       Pose currentPose = pChassis->getLocalizer()->getPose();
-      float linearError = Point::distance(currentPose.getPoint(), this->target.targetPoint.value());
+      float linearError = Point::distance(
+          currentPose.getPoint(), this->target.targetPoint.value());
 
       Point carrotPoint =
-          Point::fromPolar(-linearError * kLead, this->target.targetHeading.value()) +
+          Point::fromPolar(
+              -linearError * kLead, this->target.targetHeading.value()) +
           this->target.targetPoint.value();
       Point deltaPoint = carrotPoint - currentPose.getPoint();
 
-      Angle<Radians> angularError = Angle<Radians>(atan2(deltaPoint.y, deltaPoint.x)) -
-                                    currentPose.heading;  // Final heading error
+      Angle<Radians> angularError =
+          Angle<Radians>(atan2(deltaPoint.y, deltaPoint.x)) -
+          currentPose.heading;  // Final heading error
 
       while (std::fabs(angularError.getValue()) > pi)
-        angularError = angularError - Angle<Radians>(
-                                          2.0f * pi * angularError.getValue() /
-                                          std::fabs(angularError.getValue()));
+        angularError =
+            angularError - Angle<Radians>(
+                               2.0f * pi * angularError.getValue() /
+                               std::fabs(angularError.getValue()));
 
       float linearSpeed = linearPID.calculate(linearError, 0.01f);
 
       linearSpeed = std::min(
                         std::abs(linearSpeed),
-                        this->target.maxVelocityPct * pChassis->properties.maxVelocity) *
+                        this->target.maxVelocityPct *
+                            pChassis->properties.maxVelocity) *
                     sign(linearSpeed);
 
-      float angularSpeed = angularPID.calculate(angularError.getValue(), 0.01f);
+      float angularSpeed =
+          angularPID.calculate(angularError.getValue(), 0.01f);
 
       if (linearError < pChassis->properties.trackwidth / 2)
       {
-        Angle<Radians> finalAngularError = this->target.targetHeading.value() - currentPose.heading;
-        angularSpeed = angularPID.calculate(finalAngularError.getValue(), 0.01f);
+        Angle<Radians> finalAngularError =
+            this->target.targetHeading.value() - currentPose.heading;
+        angularSpeed =
+            angularPID.calculate(finalAngularError.getValue(), 0.01f);
       }
 
-      linearSpeed =
-          std::max(pChassis->properties.maxVelocity * this->target.finalVelocityPct, linearSpeed) *
-          sign(linearSpeed);
+      linearSpeed = std::max(
+                        pChassis->properties.maxVelocity *
+                            this->target.finalVelocityPct,
+                        linearSpeed) *
+                    sign(linearSpeed);
 
-      pChassis->setVelocityCommand(
-          VelocityPair<Radians>{linearSpeed, Angle<Radians>(angularSpeed)});
+      pChassis->setVelocityCommand(VelocityPair<Radians>{
+          linearSpeed, Angle<Radians>(angularSpeed)});
 
       mutex.unlock();
       pros::delay(10);
@@ -138,13 +151,13 @@ class BoomerangController : public AbstractController
     return *this;
   }
 
-  static std::shared_ptr<BoomerangController> build(
+  static BoomerangController build(
       std::shared_ptr<DifferentialChassis> pChassis,
       PID linearPID,
       PID angularPID,
-      const std::vector<std::shared_ptr<AbstractExitCondition>>& exitConditions = {})
+      const std::vector<std::shared_ptr<AbstractExitCondition>>&
+          exitConditions = {})
   {
-    return std::make_shared<BoomerangController>(
-        pChassis, linearPID, angularPID, 0.5, exitConditions);
+    return {pChassis, linearPID, angularPID, 0.5, exitConditions};
   }
 };

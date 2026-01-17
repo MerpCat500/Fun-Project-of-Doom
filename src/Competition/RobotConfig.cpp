@@ -97,12 +97,12 @@ std::shared_ptr<CustomExitCondition> buttonExit =
           return primary->get_digital(pros::E_CONTROLLER_DIGITAL_B);
         });
 
-std::shared_ptr<SeekingController> seeking = SeekingController::build(
+SeekingController seeking = SeekingController::build(
     chassis, PID(1.0f, 0.0f, 0.0f), PID(1.0f, 0.0f, 0.0f));
 
-std::shared_ptr<BoomerangController> boomerang =
+BoomerangController boomerang =
     BoomerangController::build(
         chassis, PID(1.0f, 0.0f, 0.0f), PID(1.0f, 0.0f, 0.0f));
 
-std::shared_ptr<TankControl> tankControl =
+TankControl tankControl =
     TankControl::build(chassis, primary);

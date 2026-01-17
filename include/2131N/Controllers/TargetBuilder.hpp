@@ -20,14 +20,14 @@ template <std::derived_from<AbstractController> ControllerType>
 class TargetBuilder
 {
  private:
-  std::shared_ptr<ControllerType> pController;
+  ControllerType pController;
   std::shared_ptr<DifferentialChassis> pChassis;
   Target target;
 
  public:
   TargetBuilder(
       std::shared_ptr<DifferentialChassis> chassis,
-      std::shared_ptr<ControllerType> controller)
+      ControllerType& controller)
       : pController(controller), pChassis(chassis)
   {
   }
@@ -93,13 +93,9 @@ class TargetBuilder
     return *this;
   }
 
-  std::shared_ptr<ControllerType> build()
+  ControllerType build()
   {
-    pController->setTarget(target);
+    pController.setTarget(target);
     return pController;
   }
 };
-
-template <std::derived_from<AbstractController> T>
-TargetBuilder(std::shared_ptr<T>, std::shared_ptr<DifferentialChassis>)
-    -> TargetBuilder<T>;

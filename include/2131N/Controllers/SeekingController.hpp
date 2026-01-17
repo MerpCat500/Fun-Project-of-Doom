@@ -280,14 +280,13 @@ class SeekingController : public AbstractController
     pChassis->setWheelVoltages(0, 0);
   }
 
-  static std::shared_ptr<SeekingController> build(
+  static SeekingController build(
       std::shared_ptr<DifferentialChassis> pChassis,
       PID linearPID,
       PID angularPID,
       const std::vector<std::shared_ptr<AbstractExitCondition>>&
           exitConditions = {})
   {
-    return std::make_shared<SeekingController>(
-        pChassis, linearPID, angularPID, exitConditions);
+    return {pChassis, linearPID, angularPID, exitConditions};
   }
 };

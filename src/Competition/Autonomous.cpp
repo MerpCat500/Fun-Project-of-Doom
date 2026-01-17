@@ -21,5 +21,6 @@ void debug()
       .maxVelocity(0.8)
       .targetWith(Direction::BACK)
       .build()
-      ->moveTo();
+      .setLead(0.5)
+      .moveTo();
 }
