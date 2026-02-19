@@ -46,6 +46,7 @@ class SeekingController : public AbstractController
 
   void moveTo()
   {
+    // TODO: Test, Tune, and check controller logic
     mutex.lock();
     linearPID.reset();
     angularPID.reset();
@@ -62,6 +63,7 @@ class SeekingController : public AbstractController
       mutex.unlock();
       target.asAsync = false;
 
+      // TODO: Make this thread safe / rework the async logic
       pros::Task(
           [this]() { this->moveTo(); },
           "Async Seeking Controller Move To Task");

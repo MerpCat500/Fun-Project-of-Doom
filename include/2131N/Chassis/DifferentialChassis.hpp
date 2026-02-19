@@ -34,8 +34,9 @@ struct PhysicalProperties
 
   const float motorWattage;  // Wattage of motors
 
-  const float maxVelocity;                  // Max Velocity of Drivetrain
-  const Angle<Radians> maxAngularVelocity;  // Max angular velocity of drivetrain
+  const float maxVelocity;  // Max Velocity of Drivetrain
+  const Angle<Radians>
+      maxAngularVelocity;  // Max angular velocity of drivetrain
 
   PhysicalProperties(
       float drivelength,
@@ -54,12 +55,14 @@ struct PhysicalProperties
         wheelDiameter(wheelDiameter),
         motorWattage(motorWattage),
         maxVelocity(maxVelocity),
-        maxAngularVelocity(Angle<Radians>(maxVelocity / (trackwidth / 2.0f)))
+        maxAngularVelocity(
+            Angle<Radians>(maxVelocity / (trackwidth / 2.0f)))
   {
   }
 };
 
 class DifferentialChassis
+    : public std::enable_shared_from_this<DifferentialChassis>
 {
  private:
   // Devices
@@ -73,21 +76,26 @@ class DifferentialChassis
   float rightVoltage = 0.0f;  // In millivolts
 
   // Motor Gains
-  const float kS;  // Static gain (millivolts needed to overcome static friction)
+  const float
+      kS;  // Static gain (millivolts needed to overcome static friction)
   const float kV;  // Velocity gain (millivolts per in/s of wheel velocity)
 
   // Multi-threading Objects
-  pros::Mutex updateMutex;      // Mutex for updating motor voltages
-  const pros::Task updateTask;  // Task for continuously updating motor voltages
+  pros::Mutex updateMutex;  // Mutex for updating motor voltages
+  pros::Task updateTask = pros::Task(
+      []() {});  // Task for continuously updating motor voltages
 
   // Movement Mutex
-  pros::Mutex movementMutex;  // Mutex for controlling access to the chassis for movement commands
-  std::uint64_t currentToken = 1;  // Token for tracking control access to the chassis
+  pros::Mutex movementMutex;  // Mutex for controlling access to the
+                              // chassis for movement commands
+  std::uint64_t currentToken =
+      1;  // Token for tracking control access to the chassis
 
  private:
   /**
-   * @brief  Updates the motor voltages based on the current leftVoltage and rightVoltage values.
-   * This function is called continuously in a separate task.
+   * @brief  Updates the motor voltages based on the current leftVoltage
+   * and rightVoltage values. This function is called continuously in a
+   * separate task.
    *
    */
   void update_()
@@ -99,15 +107,18 @@ class DifferentialChassis
   }
 
  public:
-  const PhysicalProperties properties;  // Physical properties of the chassis
+  const PhysicalProperties
+      properties;  // Physical properties of the chassis
 
  public:
   /**
    * @brief Construct a new Differential Chassis object
    *
    * @param localizer Pointer to a localizing system for the chassis
-   * @param leftGroup Pointer to the group of motors on the left side of the chassis
-   * @param rightGroup Pointer to the group of motors on the right side of the chassis
+   * @param leftGroup Pointer to the group of motors on the left side of
+   * the chassis
+   * @param rightGroup Pointer to the group of motors on the right side of
+   * the chassis
    * @param kS Static gain (millivolts needed to overcome static friction)
    * @param kV Velocity gain (millivolts per in/s of wheel velocity)
    * @param properties Physical properties of the chassis
@@ -136,46 +147,54 @@ class DifferentialChassis
   }
 
   /**
-   * @brief Set a (Linear and Angular) velocity command for the chassis. This will be converted to
-   * wheel voltages and applied to the motors.
+   * @brief Set a (Linear and Angular) velocity command for the chassis.
+   * This will be converted to wheel voltages and applied to the motors.
    *
-   * @param cmd The desired linear and angular velocity command for the chassis, in inches per
-   * second and radians per second
+   * @param cmd The desired linear and angular velocity command for the
+   * chassis, in inches per second and radians per second
    */
   template <typename Unit>
   void setVelocityCommand(const VelocityPair<Unit>& cmd)
   {
-    // This doesn't need to be locked because it doesn't read or write any shared data.
-    WheelVelocities wheelVelocities = PairToWheel(cmd, properties.trackwidth);
+    // This doesn't need to be locked because it doesn't read or write any
+    // shared data.
+    WheelVelocities wheelVelocities =
+        PairToWheel(cmd, properties.trackwidth);
 
     this->setWheelVelocities(wheelVelocities);
   }
 
   /**
-   * @brief Set the Wheel Velocities of the chassis. This will be converted to voltages and applied
-   * to the motors.
+   * @brief Set the Wheel Velocities of the chassis. This will be converted
+   * to voltages and applied to the motors.
    *
-   * @param wheelVelocities The desired wheel velocities for the chassis, in inches per second
+   * @param wheelVelocities The desired wheel velocities for the chassis,
+   * in inches per second
    */
   void setWheelVelocities(WheelVelocities wheelVelocities)
   {
-    // This doesn't need to be locked because it doesn't read or write any shared data.
+    // This doesn't need to be locked because it doesn't read or write any
+    // shared data.
 
-    // Convert Wheel Velocities to Voltages using the feedforward formula: voltage = kS *
-    // sign(velocity) + kV * velocity
-    float leftVoltage = kS * sign(wheelVelocities.leftVelocity) + kV * wheelVelocities.leftVelocity;
-    float rightVoltage =
-        kS * sign(wheelVelocities.rightVelocity) + kV * wheelVelocities.rightVelocity;
+    // Convert Wheel Velocities to Voltages using the feedforward formula:
+    // voltage = kS * sign(velocity) + kV * velocity
+    float leftVoltage = kS * sign(wheelVelocities.leftVelocity) +
+                        kV * wheelVelocities.leftVelocity;
+    float rightVoltage = kS * sign(wheelVelocities.rightVelocity) +
+                         kV * wheelVelocities.rightVelocity;
 
     // Set wheel Voltages
     this->setWheelVoltages(leftVoltage, rightVoltage);
   }
 
   /**
-   * @brief Set the Wheel Voltages for the chassis. This will be applied to the motors.
+   * @brief Set the Wheel Voltages for the chassis. This will be applied to
+   * the motors.
    *
-   * @param leftVoltage The desired voltage for the left motors, in millivolts
-   * @param rightVoltage The desired voltage for the right motors, in millivolts
+   * @param leftVoltage The desired voltage for the left motors, in
+   * millivolts
+   * @param rightVoltage The desired voltage for the right motors, in
+   * millivolts
    */
   void setWheelVoltages(float leftVoltage, float rightVoltage)
   {
@@ -187,76 +206,90 @@ class DifferentialChassis
   }
 
   /**
-   * @brief Get the Localizer for the chassis, which can be used to get the current pose of the
-   * robot.
+   * @brief Get the Localizer for the chassis, which can be used to get the
+   * current pose of the robot.
    *
-   * @return std::shared_ptr<AbstractLocalizer> Pointer to the localizer for the chassis
+   * @return std::shared_ptr<AbstractLocalizer> Pointer to the localizer
+   * for the chassis
    */
   std::shared_ptr<AbstractLocalizer> getLocalizer() const
   {
-    // This doesn't need to be locked because the pointer isn't effected by other code
+    // This doesn't need to be locked because the pointer isn't effected by
+    // other code
     return localizer;
   }
 
   /**
-   * @brief Checkout control of the robot, which allows the caller to send movement commands to the
-   * chassis. This will lock the movement mutex and return a token that can be used to check if the
-   * caller still has control of the chassis.
+   * @brief Checkout control of the robot, which allows the caller to send
+   * movement commands to the chassis. This will lock the movement mutex
+   * and return a token that can be used to check if the caller still has
+   * control of the chassis.
    *
-   * @return std::uint64_t A token that can be used to check if the caller still has control of the
-   * chassis. The caller must call releaseControlToken with this token to release control of the
-   * chassis.
+   * @return std::uint64_t A token that can be used to check if the caller
+   * still has control of the chassis. The caller must call
+   * releaseControlToken with this token to release control of the chassis.
    */
   std::uint64_t checkoutControlToken()
   {
-    // Lock the update mutex to safely access the current token and lock the movement mutex
+    // Lock the update mutex to safely access the current token and lock
+    // the movement mutex
     std::lock_guard<pros::Mutex> lock(updateMutex);
 
-    // Lock the movement mutex to gain control of the chassis for movement commands
+    // Lock the movement mutex to gain control of the chassis for movement
+    // commands
     movementMutex.lock();
-    return currentToken;  // Return the current token to the caller for tracking control access
+    return currentToken;  // Return the current token to the caller for
+                          // tracking control access
   }
 
   /**
-   * @brief Check if the provided control token is still valid, indicating if the caller has control
-   * of the chassis.
+   * @brief Check if the provided control token is still valid, indicating
+   * if the caller has control of the chassis.
    *
    * @param token The control token to check for validity
-   * @return true If the token is valid and the caller has control of the chassis
-   * @return false If the token is invalid and the caller does not have control of the chassis
+   * @return true If the token is valid and the caller has control of the
+   * chassis
+   * @return false If the token is invalid and the caller does not have
+   * control of the chassis
    */
   bool checkControlToken(std::uint64_t token)
   {
-    // Lock the update mutex to safely check the token against the current token
+    // Lock the update mutex to safely check the token against the current
+    // token
     std::lock_guard<pros::Mutex> lock(updateMutex);
-    return (token == currentToken);  // Returns if the provided token matches the current token,
-                                     // indicating control access
+    return (
+        token ==
+        currentToken);  // Returns if the provided token matches the
+                        // current token, indicating control access
   }
 
   /**
-   * @brief Release control of the chassis for the caller with the provided token. This will unlock
-   * the movement mutex if the token is valid, allowing other callers to gain control of the
-   * chassis.
+   * @brief Release control of the chassis for the caller with the provided
+   * token. This will unlock the movement mutex if the token is valid,
+   * allowing other callers to gain control of the chassis.
    *
    * @param token The control token to release control of the chassis
    */
   void releaseControlToken(std::uint64_t token)
   {
-    // Lock the update mutex to safely check the token and release control if valid
+    // Lock the update mutex to safely check the token and release control
+    // if valid
     std::lock_guard<pros::Mutex> lock(updateMutex);
 
     // Only release control if the provided token matches the current token
     if (token == currentToken)
     {
       movementMutex.unlock();
-      currentToken++;  // Update the current token to invalidate any previous tokens
+      currentToken++;  // Update the current token to invalidate any
+                       // previous tokens
     }
   }
 
   /**
-   * @brief This will invalidate the current token and release control of the chassis, allowing
-   * other callers to gain control. This should only be called at the end of the autonomous period
-   * or the start of operator control. Usage inside of a controller is discouraged as it may lead to
+   * @brief This will invalidate the current token and release control of
+   * the chassis, allowing other callers to gain control. This should only
+   * be called at the end of the autonomous period or the start of operator
+   * control. Usage inside of a controller is discouraged as it may lead to
    * unexpected behavior.
    *
    */
@@ -265,22 +298,26 @@ class DifferentialChassis
     // Lock the update mutex to safely release control of the chassis
     std::lock_guard<pros::Mutex> lock(updateMutex);
     movementMutex.unlock();
-    currentToken++;  // Update the current token to invalidate any previous tokens
+    currentToken++;  // Update the current token to invalidate any previous
+                     // tokens
   }
 
   /**
-   * @brief Build a new DifferentialChassis object with the provided parameters. This is a static
-   * factory method that can be used to create a new chassis with the specified localizer, motor
-   * groups, gains, and physical properties.
+   * @brief Build a new DifferentialChassis object with the provided
+   * parameters. This is a static factory method that can be used to create
+   * a new chassis with the specified localizer, motor groups, gains, and
+   * physical properties.
    *
    * @param localizer Pointer to a localizing system for the chassis
-   * @param leftGroup Pointer to the group of motors on the left side of the chassis
-   * @param rightGroup  Pointer to the group of motors on the right side of the chassis
+   * @param leftGroup Pointer to the group of motors on the left side of
+   * the chassis
+   * @param rightGroup  Pointer to the group of motors on the right side of
+   * the chassis
    * @param kS Static gain (millivolts needed to overcome static friction)
    * @param kV Velocity gain (millivolts per in/s of wheel velocity)
    * @param properties Physical properties of the chassis
-   * @return std::shared_ptr<DifferentialChassis> A shared pointer to the newly created
-   * DifferentialChassis object
+   * @return std::shared_ptr<DifferentialChassis> A shared pointer to the
+   * newly created DifferentialChassis object
    */
   static std::shared_ptr<DifferentialChassis> build(
       std::shared_ptr<AbstractLocalizer> localizer,
@@ -293,29 +330,54 @@ class DifferentialChassis
     return std::make_shared<DifferentialChassis>(
         localizer, leftGroup, rightGroup, kS, kV, properties);
   }
+
+  void startThreading()
+  {
+    // TODO: Update this to use Task class once tested
+    std::weak_ptr<DifferentialChassis> self = weak_from_this();
+
+    updateTask = pros::Task(
+        [self]() {
+          while (true)
+          {
+            if (auto s = self.lock()) { s->update_(); }
+            else
+            {
+              // object is gone → exit task cleanly
+              break;
+            }
+            pros::delay(10);
+          }
+        },
+        "Differential Chassis Update Task");
+  }
 };
 
 // RAII Wrapper for DifferentialChassis control token
 class DifferentialChassisLock
 {
  private:
-  std::shared_ptr<DifferentialChassis> chassis;  // Pointer to the chassis being controlled
-  std::uint64_t token;  // Control token for tracking ownership of the chassis control
+  std::shared_ptr<DifferentialChassis>
+      chassis;          // Pointer to the chassis being controlled
+  std::uint64_t token;  // Control token for tracking ownership of the
+                        // chassis control
 
  public:
   /**
-   * @brief Construct a new Differential Chassis Lock object, which will acquire control of the
-   * chassis for the caller.
+   * @brief Construct a new Differential Chassis Lock object, which will
+   * acquire control of the chassis for the caller.
    *
    * @param chassis
    */
-  DifferentialChassisLock(std::shared_ptr<DifferentialChassis> chassis) : chassis(chassis)
+  DifferentialChassisLock(std::shared_ptr<DifferentialChassis> chassis)
+      : chassis(chassis)
   {
     token = chassis->checkoutControlToken();
   }
 
   /**
-   * @brief Checks if the lock is still active, meaning the caller still has control of the chassis.
+   * @brief Checks if the lock is still active, meaning the caller still
+   * has control of the chassis.
    *
    * @return true Caller has control of the chassis
    * @return false Caller should release control of the chassis
@@ -323,8 +385,8 @@ class DifferentialChassisLock
   bool isValid() const { return chassis->checkControlToken(token); }
 
   /**
-   * @brief Destroy the Differential Chassis Lock object, which will release control of the chassis
-   * if the lock is still valid.
+   * @brief Destroy the Differential Chassis Lock object, which will
+   * release control of the chassis if the lock is still valid.
    *
    */
   ~DifferentialChassisLock() { chassis->releaseControlToken(token); }

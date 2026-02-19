@@ -1,5 +1,7 @@
 {
     "editor.formatOnSave": true,
     "doxdocgen.generic.authorName": "Andrew Hilton",
-    "doxdocgen.generic.authorEmail": "2131H"
+    "doxdocgen.generic.authorEmail": "2131H",
+    "editor.fontFamily": "'Fira Code'",
+    "editor.fontLigatures": true,
 }

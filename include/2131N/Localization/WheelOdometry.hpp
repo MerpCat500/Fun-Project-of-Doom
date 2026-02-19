@@ -22,10 +22,12 @@
 #include "2131N/Localization/TrackingWheels/AbstractTrackingWheel.hpp"
 #include "2131N/Utilities/Angle.hpp"
 #include "2131N/Utilities/HelperMath.hpp"
+#include "2131N/Utilities/Threading.hpp"
 #include "pros/imu.hpp"
 #include "pros/rtos.hpp"
 
-class WheelOdometry : public AbstractLocalizer
+class WheelOdometry : public AbstractLocalizer,
+                      public std::enable_shared_from_this<WheelOdometry>
 {
  private:
   // Sensor Information
@@ -35,7 +37,7 @@ class WheelOdometry : public AbstractLocalizer
 
   // Multithreading Objects
   pros::Mutex updateMutex;
-  const pros::Task updateTask;
+  Task<WheelOdometry> updateTask;
 
   // Robot State
   Pose currentPose{0, 0, 0};
@@ -49,6 +51,9 @@ class WheelOdometry : public AbstractLocalizer
  private:
   void update_() override
   {
+    // TODO: Implement IMU Drift Correction and check to see if it improves
+    // accuracy
+
     std::lock_guard<pros::Mutex> lock(updateMutex);
     if (linearWheels.size() == 0 || inertialSensors.size() == 0) return;
 
@@ -56,25 +61,31 @@ class WheelOdometry : public AbstractLocalizer
     Angle<Radians> heading = 0.0f;
     for (auto& sensor : inertialSensors)
     {
-      // * -sensor->get_heading() to convert from clockwise positive to counterclockwise positive
-      heading = heading + Angle<Radians>::toRadians(Angle<Degrees>(360.0f - sensor->get_heading()));
+      // * -sensor->get_heading() to convert from clockwise positive to
+      // counterclockwise positive
+      heading = heading + Angle<Radians>::toRadians(Angle<Degrees>(
+                              360.0f - sensor->get_heading()));
     }
-    if (std::isinf(heading.getValue()) || std::isnan(heading.getValue())) return;
+    if (std::isinf(heading.getValue()) || std::isnan(heading.getValue()))
+      return;
 
-    heading = Angle<Radians>(heading.getValue() / static_cast<float>(inertialSensors.size()));
+    heading = Angle<Radians>(
+        heading.getValue() / static_cast<float>(inertialSensors.size()));
 
     // Calculate change in heading
     Angle<Radians> deltaHeading = heading - lastPose.getAngle<Radians>();
 
     // Average heading during the last 10ms (in radians)
-    float averageHeading =
-        lastPose.getAngle<Radians>().getValue() + (deltaHeading.getValue() / 2.0f);
+    float averageHeading = lastPose.getAngle<Radians>().getValue() +
+                           (deltaHeading.getValue() / 2.0f);
 
     // Calculate the delta time since last update
     auto currentTime = pros::micros();
-    float deltaTime = static_cast<float>(currentTime - lastUpdateTime) / 1000000.0f;  // in seconds
+    float deltaTime = static_cast<float>(currentTime - lastUpdateTime) /
+                      1000000.0f;  // in seconds
 
-    if (deltaTime <= 0.0f) return;  // Prevent division by zero or negative time
+    if (deltaTime <= 0.0f)
+      return;  // Prevent division by zero or negative time
 
     // Calculate the distance moved in the colinear direction
 
@@ -82,11 +93,15 @@ class WheelOdometry : public AbstractLocalizer
     for (auto& wheel : linearWheels)
     {
       float deltaX = wheel->getVelocity() * deltaTime;
-      if (std::abs(deltaHeading.getValue()) < 2.0e-4f) { colinearDisplacement += deltaX; }
+      if (std::abs(deltaHeading.getValue()) < 2.0e-4f)
+      {
+        colinearDisplacement += deltaX;
+      }
       else
       {
-        colinearDisplacement +=
-            chordLength(deltaX / deltaHeading.getValue() + wheel->offsetFromCenter(), deltaHeading);
+        colinearDisplacement += chordLength(
+            deltaX / deltaHeading.getValue() + wheel->offsetFromCenter(),
+            deltaHeading);
       }
     }
     colinearDisplacement /= static_cast<float>(linearWheels.size());
@@ -96,27 +111,34 @@ class WheelOdometry : public AbstractLocalizer
     for (auto& wheel : lateralWheels)
     {
       float deltaY = wheel->getVelocity() * deltaTime;
-      if (std::abs(deltaHeading.getValue()) < 2.0e-6f) { lateralDisplacement += deltaY; }
+      if (std::abs(deltaHeading.getValue()) < 2.0e-6f)
+      {
+        lateralDisplacement += deltaY;
+      }
       else
       {
-        lateralDisplacement +=
-            chordLength(deltaY / deltaHeading.getValue() + wheel->offsetFromCenter(), deltaHeading);
+        lateralDisplacement += chordLength(
+            deltaY / deltaHeading.getValue() + wheel->offsetFromCenter(),
+            deltaHeading);
       }
     }
-    if (lateralWheels.size() > 0) lateralDisplacement /= static_cast<float>(lateralWheels.size());
+    if (lateralWheels.size() > 0)
+      lateralDisplacement /= static_cast<float>(lateralWheels.size());
 
     // Apply rotation using average heading (radians)
-    currentPose = lastPose + Pose{
-                                 colinearDisplacement * std::cos(averageHeading) -
-                                     lateralDisplacement * std::sin(averageHeading),
-                                 colinearDisplacement * std::sin(averageHeading) +
-                                     lateralDisplacement * std::cos(averageHeading),
-                                 deltaHeading,
-                             };
+    currentPose =
+        lastPose + Pose{
+                       colinearDisplacement * std::cos(averageHeading) -
+                           lateralDisplacement * std::sin(averageHeading),
+                       colinearDisplacement * std::sin(averageHeading) +
+                           lateralDisplacement * std::cos(averageHeading),
+                       deltaHeading,
+                   };
 
     // Update the local and global velocities
     currentVelocity.linearVelocity =
-        Point::distance(currentPose.getPoint(), lastPose.getPoint()) / deltaTime;
+        Point::distance(currentPose.getPoint(), lastPose.getPoint()) /
+        deltaTime;
     currentVelocity.angularVelocity =
         Angle<Radians>::fromRadians(deltaHeading.getValue() / deltaTime);
 
@@ -134,16 +156,7 @@ class WheelOdometry : public AbstractLocalizer
       const std::vector<pros::IMU*>& headingSensorsList)
       : linearWheels(colinear),
         lateralWheels(lateral),
-        inertialSensors(headingSensorsList),
-        updateTask(
-            [this]() {
-              while (true)
-              {
-                this->update_();
-                pros::delay(10);
-              }
-            },
-            "Wheel Odometry Update Task")
+        inertialSensors(headingSensorsList)
   {
     lastUpdateTime = pros::micros();
   };
@@ -213,6 +226,23 @@ class WheelOdometry : public AbstractLocalizer
       const std::vector<std::shared_ptr<AbstractTrackingWheel>>& lateral,
       const std::vector<pros::IMU*>& inertialSensors)
   {
-    return std::make_shared<WheelOdometry>(linear, lateral, inertialSensors);
+    auto ref =
+        std::make_shared<WheelOdometry>(linear, lateral, inertialSensors);
+
+    ref->startThreading();
+    return ref;
+  }
+
+  void startThreading()
+  {
+    // TODO: Test this multithreading implementation, make sure to update
+    // other classes if it works.
+    updateTask = Task<WheelOdometry>(
+        this,
+        [this]() { this->update_(); },
+        "Wheel Odometry Update Task",
+        10);
+
+    updateTask.start();
   }
 };

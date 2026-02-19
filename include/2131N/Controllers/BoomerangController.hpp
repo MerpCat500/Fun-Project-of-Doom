@@ -47,6 +47,7 @@ class BoomerangController : public AbstractController
 
   void moveTo()
   {
+    // TODO: Test, Tune, and check controller logic
     std::cout << "BoomerangController: Starting moveTo with target: "
               << this->target.targetPoint.value().x << ", "
               << this->target.targetPoint.value().y << std::endl;
@@ -67,6 +68,7 @@ class BoomerangController : public AbstractController
       target.asAsync = false;
       mutex.unlock();
 
+      // TODO: Make this thread safe / rework the async logic
       pros::Task([this]() { this->moveTo(); }, "Boomerang Move To Task");
       return;
     }

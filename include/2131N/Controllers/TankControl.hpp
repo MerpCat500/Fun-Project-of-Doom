@@ -61,6 +61,7 @@ class TankControl : public AbstractController
    */
   void operatorControl(float velocityPct = 1.0f)
   {
+    // TODO: Hardware Testing
     // This function should be called in a loop during operator control to
     // continuously update the chassis based on the controller input
     if (pChassis->checkControlToken(currentToken))
