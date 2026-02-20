@@ -32,6 +32,6 @@ extern std::shared_ptr<DifferentialChassis> chassis;
 
 extern std::shared_ptr<CustomExitCondition> buttonExit;
 
-extern SeekingController seeking;
-extern BoomerangController boomerang;
-extern TankControl tankControl;
+extern std::shared_ptr<SeekingController> seeking;
+extern std::shared_ptr<BoomerangController> boomerang;
+extern std::shared_ptr<TankControl> tankControl;

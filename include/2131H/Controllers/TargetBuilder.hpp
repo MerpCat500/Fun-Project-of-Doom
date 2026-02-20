@@ -27,7 +27,7 @@ class TargetBuilder
  public:
   TargetBuilder(
       std::shared_ptr<DifferentialChassis> chassis,
-      std::weak_ptr<ControllerType> controller)
+      std::shared_ptr<ControllerType> controller)
       : pController(controller), pChassis(chassis)
   {
   }
@@ -107,3 +107,7 @@ class TargetBuilder
     }
   }
 };
+
+template <std::derived_from<AbstractController> C>
+TargetBuilder(std::shared_ptr<DifferentialChassis>, std::shared_ptr<C>)
+    -> TargetBuilder<C>;

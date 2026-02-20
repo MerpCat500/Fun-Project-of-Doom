@@ -82,7 +82,7 @@ std::shared_ptr<DifferentialChassis> chassis = DifferentialChassis::build(
      64.8f});
 
 /**
- * !. 
+ * !.
  * ! #   #  ###  #   # ##### ####   ###  ##### ##### ##### ####   ####
  * ! #   # #   # #   #   #   #   # #   #  #  #  #  # #     #   # #
  * !  #### #   # #####   #   ####  #   #  #  #  #  # ####  ####  #
@@ -97,12 +97,12 @@ std::shared_ptr<CustomExitCondition> buttonExit =
           return primary->get_digital(pros::E_CONTROLLER_DIGITAL_B);
         });
 
-SeekingController seeking = SeekingController::build(
+std::shared_ptr<SeekingController> seeking = SeekingController::build(
     chassis, PID(1.0f, 0.0f, 0.0f), PID(1.0f, 0.0f, 0.0f));
 
-BoomerangController boomerang =
+std::shared_ptr<BoomerangController> boomerang =
     BoomerangController::build(
         chassis, PID(1.0f, 0.0f, 0.0f), PID(1.0f, 0.0f, 0.0f));
 
-TankControl tankControl =
+std::shared_ptr<TankControl> tankControl =
     TankControl::build(chassis, primary);

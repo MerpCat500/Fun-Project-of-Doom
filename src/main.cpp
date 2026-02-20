@@ -17,11 +17,11 @@ void autonomous() {}
 
 void opcontrol()
 {
-  tankControl.start();
+  tankControl->start();
 
   while (true)
   {
-    tankControl.operatorControl();
+    tankControl->operatorControl();
 
     if (primary->get_digital_new_press(pros::E_CONTROLLER_DIGITAL_A))
     {

@@ -31,7 +31,7 @@ class SeekingController : public AbstractController
   PID linearPID;
   PID angularPID;
 
- public:
+ protected:
   SeekingController(
       std::shared_ptr<DifferentialChassis> pChassis,
       PID linearPID,
@@ -44,6 +44,7 @@ class SeekingController : public AbstractController
   {
   }
 
+ public:
   void moveTo()
   {
     // TODO: Test, Tune, and check controller logic
@@ -282,13 +283,14 @@ class SeekingController : public AbstractController
     pChassis->setWheelVoltages(0, 0);
   }
 
-  static SeekingController build(
+  static std::shared_ptr<SeekingController> build(
       std::shared_ptr<DifferentialChassis> pChassis,
       PID linearPID,
       PID angularPID,
       const std::vector<std::shared_ptr<AbstractExitCondition>>&
           exitConditions = {})
   {
-    return {pChassis, linearPID, angularPID, exitConditions};
+    return std::shared_ptr<SeekingController>(new SeekingController(
+        pChassis, linearPID, angularPID, exitConditions));
   }
 };

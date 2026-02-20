@@ -26,7 +26,7 @@ class TankControl : public AbstractController
   const std::int32_t
       deadZone;  // Deadzone for joystick input to prevent drift
 
- public:
+ protected:
   TankControl(
       std::shared_ptr<DifferentialChassis> pChassis,
       std::shared_ptr<pros::Controller> primary,
@@ -39,6 +39,7 @@ class TankControl : public AbstractController
   {
   }
 
+ public:
   /**
    * @brief This should be called at the start of operator control to gain
    * access to the chassis.
@@ -80,13 +81,14 @@ class TankControl : public AbstractController
     }
   }
 
-  static TankControl build(
+  static std::shared_ptr<TankControl> build(
       std::shared_ptr<DifferentialChassis> pChassis,
       std::shared_ptr<pros::Controller> primary,
       std::int32_t deadZone = 10,
       const std::vector<std::shared_ptr<AbstractExitCondition>>&
           exitConditions = {})
   {
-    return {pChassis, primary, deadZone, exitConditions};
+    return std::shared_ptr<TankControl>(
+        new TankControl(pChassis, primary, deadZone, exitConditions));
   }
 };

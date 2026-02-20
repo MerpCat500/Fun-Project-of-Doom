@@ -10,8 +10,9 @@
  */
 #include "Competition/Autonomous.hpp"
 
-#include "2131N/Controllers/Target.hpp"
-#include "2131N/Controllers/TargetBuilder.hpp"
+#include "2131H/Controllers/BoomerangController.hpp"
+#include "2131H/Controllers/Target.hpp"
+#include "2131H/Controllers/TargetBuilder.hpp"
 #include "RobotConfig.hpp"
 
 void debug()

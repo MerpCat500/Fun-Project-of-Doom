@@ -15,6 +15,7 @@
 #include <cmath>
 #include <cstdint>
 #include <limits>
+#include <memory>
 #include <mutex>
 
 #include "2131H/Controllers/AbstractController.hpp"
@@ -30,7 +31,7 @@ class BoomerangController : public AbstractController
   PID linearPID;
   float kLead;
 
- public:
+ protected:
   BoomerangController(
       std::shared_ptr<DifferentialChassis> pChassis,
       PID linearPID,
@@ -45,6 +46,7 @@ class BoomerangController : public AbstractController
   {
   }
 
+ public:
   void moveTo()
   {
     // TODO: Test, Tune, and check controller logic
@@ -153,13 +155,14 @@ class BoomerangController : public AbstractController
     return *this;
   }
 
-  static BoomerangController build(
+  static std::shared_ptr<BoomerangController> build(
       std::shared_ptr<DifferentialChassis> pChassis,
       PID linearPID,
       PID angularPID,
       const std::vector<std::shared_ptr<AbstractExitCondition>>&
           exitConditions = {})
   {
-    return {pChassis, linearPID, angularPID, 0.5, exitConditions};
+    return std::shared_ptr<BoomerangController>(new BoomerangController(
+        pChassis, linearPID, angularPID, 0.5f, exitConditions));
   }
 };
