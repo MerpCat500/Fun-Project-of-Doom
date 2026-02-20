@@ -1,6 +1,6 @@
 /**
  * @file Pose.hpp
- * @author Andrew Hilton (2131N)
+ * @author Andrew Hilton (2131H)
  * @brief Pose class representing a robot position and orientation
  * @version 0.1
  * @date 2025-12-25
@@ -13,8 +13,8 @@
 
 #include <type_traits>
 
-#include "2131N/Utilities/Angle.hpp"
-#include "2131N/Utilities/Point.hpp"
+#include "2131H/Utilities/Angle.hpp"
+#include "2131H/Utilities/Point.hpp"
 
 template <typename>
 inline constexpr bool pose_always_false_v = false;

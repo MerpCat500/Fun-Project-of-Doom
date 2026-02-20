@@ -1,7 +1,7 @@
 /**
  * @file RobotConfig.hpp
- * @author Andrew Hilton (2131N)
- * @brief Configuration and global declarations for the 2131N VEX Robotics
+ * @author Andrew Hilton (2131H)
+ * @brief Configuration and global declarations for the 2131H VEX Robotics
  * team
  * @version 0.1
  * @date 2026-01-12
@@ -14,13 +14,13 @@
 
 #include <memory>
 
-#include "2131N/Chassis/DifferentialChassis.hpp"
-#include "2131N/Controllers/BoomerangController.hpp"
-#include "2131N/Controllers/ExitConditions/CustomExitCondition.hpp"
-#include "2131N/Controllers/SeekingController.hpp"
-#include "2131N/Controllers/TankControl.hpp"
-#include "2131N/Localization/TrackingWheels/IMETrackingWheel.hpp"
-#include "2131N/Localization/WheelOdometry.hpp"
+#include "2131H/Chassis/DifferentialChassis.hpp"
+#include "2131H/Controllers/BoomerangController.hpp"
+#include "2131H/Controllers/ExitConditions/CustomExitCondition.hpp"
+#include "2131H/Controllers/SeekingController.hpp"
+#include "2131H/Controllers/TankControl.hpp"
+#include "2131H/Localization/TrackingWheels/IMETrackingWheel.hpp"
+#include "2131H/Localization/WheelOdometry.hpp"
 
 extern std::shared_ptr<pros::Controller> primary;
 

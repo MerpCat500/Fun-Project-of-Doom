@@ -1,6 +1,6 @@
 /**
  * @file HelperMath.hpp
- * @author Andrew Hilton (2131N)
+ * @author Andrew Hilton (2131H)
  * @brief Helper Math Functions, such as chord length calculations
  * @version 0.1
  * @date 2025-12-25
@@ -13,7 +13,7 @@
 
 #include <cmath>
 
-#include "2131N/Utilities/Angle.hpp"
+#include "2131H/Utilities/Angle.hpp"
 
 inline float chordLength(float radius, Angle<Radians> angle)
 {

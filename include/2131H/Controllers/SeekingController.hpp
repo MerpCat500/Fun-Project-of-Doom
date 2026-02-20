@@ -1,6 +1,6 @@
 /**
  * @file SeekingController.hpp
- * @author Andrew Hilton (2131N)
+ * @author Andrew Hilton (2131H)
  * @brief Seeking Controller featuring a simple linear and angular pid
  * control algorithm
  * @version 0.1
@@ -18,12 +18,12 @@
 #include <limits>
 #include <memory>
 
-#include "2131N/Chassis/DifferentialChassis.hpp"
-#include "2131N/Controllers/AbstractController.hpp"
-#include "2131N/Controllers/ExitConditions/AbstractExitConditions.hpp"
-#include "2131N/Controllers/Target.hpp"
-#include "2131N/Utilities/Angle.hpp"
-#include "2131N/Utilities/PID.hpp"
+#include "2131H/Chassis/DifferentialChassis.hpp"
+#include "2131H/Controllers/AbstractController.hpp"
+#include "2131H/Controllers/ExitConditions/AbstractExitConditions.hpp"
+#include "2131H/Controllers/Target.hpp"
+#include "2131H/Utilities/Angle.hpp"
+#include "2131H/Utilities/PID.hpp"
 
 class SeekingController : public AbstractController
 {

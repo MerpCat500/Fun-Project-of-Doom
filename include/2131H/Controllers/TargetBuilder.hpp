@@ -11,23 +11,23 @@
 
 #pragma once
 
-#include "2131N/Chassis/DifferentialChassis.hpp"
-#include "2131N/Controllers/AbstractController.hpp"
-#include "2131N/Controllers/Target.hpp"
-#include "2131N/Utilities/Angle.hpp"
+#include "2131H/Chassis/DifferentialChassis.hpp"
+#include "2131H/Controllers/AbstractController.hpp"
+#include "2131H/Controllers/Target.hpp"
+#include "2131H/Utilities/Angle.hpp"
 
 template <std::derived_from<AbstractController> ControllerType>
 class TargetBuilder
 {
  private:
-  ControllerType pController;
+  std::weak_ptr<ControllerType> pController;
   std::shared_ptr<DifferentialChassis> pChassis;
   Target target;
 
  public:
   TargetBuilder(
       std::shared_ptr<DifferentialChassis> chassis,
-      ControllerType& controller)
+      std::weak_ptr<ControllerType> controller)
       : pController(controller), pChassis(chassis)
   {
   }
@@ -93,9 +93,17 @@ class TargetBuilder
     return *this;
   }
 
-  ControllerType build()
+  ControllerType& build()
   {
-    pController.setTarget(target);
-    return pController;
+    if (auto controller = pController.lock())
+    {
+      controller->setTarget(target);
+      return *controller;
+    }
+    else
+    {
+      throw std::runtime_error(
+          "Controller no longer exists when building target");
+    }
   }
 };

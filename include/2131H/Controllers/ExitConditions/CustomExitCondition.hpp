@@ -1,6 +1,6 @@
 /**
  * @file CustomExitCondition.hpp
- * @author Andrew Hilton (2131N)
+ * @author Andrew Hilton (2131H)
  * @brief Allows for weird random exit conditions via a lambda function
  * @version 0.1
  * @date 2025-12-30
@@ -13,7 +13,7 @@
 
 #include <functional>
 
-#include "2131N/Controllers/ExitConditions/AbstractExitConditions.hpp"
+#include "2131H/Controllers/ExitConditions/AbstractExitConditions.hpp"
 
 class CustomExitCondition : public AbstractExitCondition
 {

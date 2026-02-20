@@ -1,6 +1,6 @@
 /**
  * @file AbstractExitConditions.hpp
- * @author Andrew Hilton (2131N)
+ * @author Andrew Hilton (2131H)
  * @brief Exit Conditions Interface for Controllers
  * @version 0.1
  * @date 2025-12-30
@@ -13,8 +13,8 @@
 
 #include <memory>
 
-#include "2131N/Chassis/DifferentialChassis.hpp"
-#include "2131N/Controllers/Target.hpp"
+#include "2131H/Chassis/DifferentialChassis.hpp"
+#include "2131H/Controllers/Target.hpp"
 
 class AbstractExitCondition
 {

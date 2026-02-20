@@ -1,6 +1,6 @@
 /**
  * @file IMETrackingWheel.hpp
- * @author Andrew Hilton (2131N)
+ * @author Andrew Hilton (2131H)
  * @brief Internal Motor Encoder Tracking Wheel Implementation
  * @version 0.1
  * @date 2025-12-25
@@ -16,7 +16,7 @@
 #include <mutex>
 #include <vector>
 
-#include "2131N/Localization/TrackingWheels/AbstractTrackingWheel.hpp"
+#include "2131H/Localization/TrackingWheels/AbstractTrackingWheel.hpp"
 #include "pros/motors.h"
 #include "pros/rtos.hpp"
 

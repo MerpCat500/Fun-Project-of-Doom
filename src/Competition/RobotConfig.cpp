@@ -1,6 +1,6 @@
 /**
  * @file RobotConfig.cpp
- * @author Andrew Hilton (2131N)
+ * @author Andrew Hilton (2131H)
  * @brief
  * @version 0.1
  * @date 2026-01-15
@@ -11,7 +11,7 @@
 
 #include "Competition/RobotConfig.hpp"
 
-#include "2131N/Chassis/DifferentialChassis.hpp"
+#include "2131H/Chassis/DifferentialChassis.hpp"
 
 /**
  *-------------------------------------------------------------------------

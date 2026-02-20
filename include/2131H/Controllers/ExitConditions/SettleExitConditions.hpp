@@ -1,6 +1,6 @@
 /**
  * @file SettleExitConditions.hpp
- * @author Andrew Hilton (2131N)
+ * @author Andrew Hilton (2131H)
  * @brief Settle Exit Conditions for robot pathing
  * @version 0.1
  * @date 2025-12-30
@@ -14,8 +14,8 @@
 #include <cmath>
 #include <cstdint>
 
-#include "2131N/Controllers/ExitConditions/AbstractExitConditions.hpp"
-#include "2131N/Utilities/Angle.hpp"
+#include "2131H/Controllers/ExitConditions/AbstractExitConditions.hpp"
+#include "2131H/Utilities/Angle.hpp"
 #include "pros/rtos.hpp"
 
 template <typename Unit>

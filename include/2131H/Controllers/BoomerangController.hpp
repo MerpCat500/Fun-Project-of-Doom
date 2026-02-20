@@ -1,6 +1,6 @@
 /**
  * @file BoomerangController.hpp
- * @author Andrew Hilton (2131N)
+ * @author Andrew Hilton (2131H)
  * @brief Boomerang Controller for better move to pose control
  * @version 0.1
  * @date 2025-12-30
@@ -17,10 +17,10 @@
 #include <limits>
 #include <mutex>
 
-#include "2131N/Controllers/AbstractController.hpp"
-#include "2131N/Utilities/Angle.hpp"
-#include "2131N/Utilities/DiffDriveCmd.hpp"
-#include "2131N/Utilities/PID.hpp"
+#include "2131H/Controllers/AbstractController.hpp"
+#include "2131H/Utilities/Angle.hpp"
+#include "2131H/Utilities/DiffDriveCmd.hpp"
+#include "2131H/Utilities/PID.hpp"
 #include "pros/rtos.hpp"
 
 class BoomerangController : public AbstractController

@@ -1,6 +1,6 @@
 /**
  * @file WheelOdometry.hpp
- * @author Andrew Hilton (2131N)
+ * @author Andrew Hilton (2131H)
  * @brief Wheel Odometry based Localizer Implementation
  * @version 0.1
  * @date 2025-12-25
@@ -18,11 +18,11 @@
 #include <mutex>
 #include <vector>
 
-#include "2131N/Localization/AbstractLocalizer.hpp"
-#include "2131N/Localization/TrackingWheels/AbstractTrackingWheel.hpp"
-#include "2131N/Utilities/Angle.hpp"
-#include "2131N/Utilities/HelperMath.hpp"
-#include "2131N/Utilities/Threading.hpp"
+#include "2131H/Localization/AbstractLocalizer.hpp"
+#include "2131H/Localization/TrackingWheels/AbstractTrackingWheel.hpp"
+#include "2131H/Utilities/Angle.hpp"
+#include "2131H/Utilities/HelperMath.hpp"
+#include "2131H/Utilities/Threading.hpp"
 #include "pros/imu.hpp"
 #include "pros/rtos.hpp"
 

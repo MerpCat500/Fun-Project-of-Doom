@@ -1,6 +1,6 @@
 /**
  * @file DifferentialChassis.hpp
- * @author Andrew Hilton (2131N)
+ * @author Andrew Hilton (2131H)
  * @brief Differential Chassis Implementation
  * @version 0.1
  * @date 2025-12-25
@@ -15,10 +15,10 @@
 #include <memory>
 #include <mutex>
 
-#include "2131N/Localization/AbstractLocalizer.hpp"
-#include "2131N/Utilities/Angle.hpp"
-#include "2131N/Utilities/DiffDriveCmd.hpp"
-#include "2131N/Utilities/HelperMath.hpp"
+#include "2131H/Localization/AbstractLocalizer.hpp"
+#include "2131H/Utilities/Angle.hpp"
+#include "2131H/Utilities/DiffDriveCmd.hpp"
+#include "2131H/Utilities/HelperMath.hpp"
 #include "pros/motor_group.hpp"
 
 struct PhysicalProperties

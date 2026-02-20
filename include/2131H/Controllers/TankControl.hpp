@@ -1,6 +1,6 @@
 /**
  * @file TankControl.hpp
- * @author Andrew Hilton (2131N)
+ * @author Andrew Hilton (2131H)
  * @brief Implementation of a Tank Drive operator control scheme
  * @version 0.1
  * @date 2026-01-15
@@ -13,7 +13,7 @@
 
 #include <sys/types.h>
 
-#include "2131N/Controllers/AbstractController.hpp"
+#include "2131H/Controllers/AbstractController.hpp"
 
 class TankControl : public AbstractController
 {

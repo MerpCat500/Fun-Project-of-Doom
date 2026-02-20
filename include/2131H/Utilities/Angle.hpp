@@ -1,6 +1,6 @@
 /**
  * @file Angle.hpp
- * @author Andrew Hilton (2131N)
+ * @author Andrew Hilton (2131H)
  * @brief Angle Utility Class
  * @version 0.1
  * @date 2025-12-25

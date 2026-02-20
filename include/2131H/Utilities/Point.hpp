@@ -1,6 +1,6 @@
 /**
  * @file Point.hpp
- * @author Andrew Hilton (2131N)
+ * @author Andrew Hilton (2131H)
  * @brief Point class (2D coordinate)
  * @version 0.1
  * @date 2025-12-25
@@ -13,7 +13,7 @@
 
 #include <cmath>
 
-#include "2131N/Utilities/Angle.hpp"
+#include "2131H/Utilities/Angle.hpp"
 
 struct Point
 {

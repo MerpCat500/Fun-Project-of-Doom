@@ -1,6 +1,6 @@
 /**
  * @file PID.hpp
- * @author Andrew Hilton (2131N)
+ * @author Andrew Hilton (2131H)
  * @brief PID Utility Class
  * @version 0.1
  * @date 2025-12-26
