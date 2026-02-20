@@ -149,7 +149,7 @@ class WheelOdometry : public AbstractLocalizer,
     lastUpdateTime = currentTime;
   };
 
- public:
+ protected:
   WheelOdometry(
       const std::vector<std::shared_ptr<AbstractTrackingWheel>>& colinear,
       const std::vector<std::shared_ptr<AbstractTrackingWheel>>& lateral,
@@ -161,6 +161,7 @@ class WheelOdometry : public AbstractLocalizer,
     lastUpdateTime = pros::micros();
   };
 
+ public:
   Pose getPose() override
   {
     std::lock_guard<pros::Mutex> lock(updateMutex);
@@ -226,8 +227,8 @@ class WheelOdometry : public AbstractLocalizer,
       const std::vector<std::shared_ptr<AbstractTrackingWheel>>& lateral,
       const std::vector<pros::IMU*>& inertialSensors)
   {
-    auto ref =
-        std::make_shared<WheelOdometry>(linear, lateral, inertialSensors);
+    auto ref = std::shared_ptr<WheelOdometry>(
+        new WheelOdometry(linear, lateral, inertialSensors));
 
     ref->startThreading();
     return ref;

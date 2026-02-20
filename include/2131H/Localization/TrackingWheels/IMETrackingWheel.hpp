@@ -80,7 +80,7 @@ class IMETrackingWheel
         (sensorCount > 0.0f) ? (displacementSum / sensorCount) : 0.0f;
   }
 
- public:
+ protected:
   IMETrackingWheel(
       float offsetFromCenter,
       const float ticksPerInch,
@@ -103,6 +103,7 @@ class IMETrackingWheel
     }
   }
 
+ public:
   float getDisplacement() override
   {
     std::lock_guard<pros::Mutex> lock(updateMutex);
@@ -137,8 +138,8 @@ class IMETrackingWheel
       const float ticksPerInch,
       const std::vector<std::int8_t>& ports)
   {
-    auto ref = std::make_shared<IMETrackingWheel>(
-        offsetFromCenter, ticksPerInch, ports);
+    auto ref = std::shared_ptr<IMETrackingWheel>(
+        new IMETrackingWheel(offsetFromCenter, ticksPerInch, ports));
 
     ref->startThreading();
     return ref;

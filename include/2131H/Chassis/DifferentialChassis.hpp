@@ -110,7 +110,7 @@ class DifferentialChassis
   const PhysicalProperties
       properties;  // Physical properties of the chassis
 
- public:
+ protected:
   /**
    * @brief Construct a new Differential Chassis object
    *
@@ -146,6 +146,7 @@ class DifferentialChassis
   {
   }
 
+ public:
   /**
    * @brief Set a (Linear and Angular) velocity command for the chassis.
    * This will be converted to wheel voltages and applied to the motors.
@@ -327,8 +328,12 @@ class DifferentialChassis
       float kV,
       const PhysicalProperties properties)
   {
-    return std::make_shared<DifferentialChassis>(
-        localizer, leftGroup, rightGroup, kS, kV, properties);
+    auto ref =
+        std::shared_ptr<DifferentialChassis>(new DifferentialChassis(
+            localizer, leftGroup, rightGroup, kS, kV, properties));
+
+    ref->startThreading();
+    return ref;
   }
 
   void startThreading()
